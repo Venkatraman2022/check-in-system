@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> {
             // is not restarted.
             primarySwatch: Colors.blue,
           ),
-            initialRoute:  'Dropin',
+            initialRoute:  'adminLogin',
             routes:  {
               '/' : (context ) => UserPage(),
               'Dropin' : (context ) => UserPage(),

@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:csv/csv.dart';
 
 class CustomerVisits extends StatefulWidget {
 
@@ -36,8 +39,7 @@ class Record {
 }
 
 class _CustomerVisitsState extends State<CustomerVisits> {
-
-
+  List<List<String>> csvrow = [];
   DateTime currentDate = DateTime.now();
   var dateFormat = DateFormat('d-MM-yy');
   DateTime fromSelected;
@@ -392,7 +394,7 @@ class _CustomerVisitsState extends State<CustomerVisits> {
                     child: CircularProgressIndicator(),
                   );
                 } else {
-                  print('venkat');
+                  getlist(snapshot);
                   return SingleChildScrollView(
                     child: DataTable(
                       sortAscending: true,
@@ -447,10 +449,44 @@ class _CustomerVisitsState extends State<CustomerVisits> {
                 }
               },
             ),
+            SizedBox(
+              height: size.height * 0.05,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: ElevatedButton(
+
+                      onPressed: () async {
+                        final csvData = ListToCsvConverter().convert(csvrow);
+                        html.AnchorElement()
+                          ..href =
+                              '${Uri.dataFromString(csvData, mimeType: 'text/csv', encoding: utf8)}'
+                          ..download = 'data.csv'
+                          ..style.display = 'none'
+                          ..click();
+                      },
+                      child: Text('Export as CSV')),
+                ),
+              ],
+            )
           ],
         ),
       );
 
+  }
+  List getlist(AsyncSnapshot snapshot) {
+    return snapshot.data.docs.forEach((element) {
+      csvrow.add([
+        element.get('name'),
+        element.get('mobile'),
+        element.get('guests'),
+        element.get('date'),
+        element.get('time'),
+      ]);
+    });
   }
   List<DataRow> _buildList(BuildContext context, List<DocumentSnapshot> data,int  snap, String _searchKey) {
 
