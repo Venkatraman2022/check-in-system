@@ -1,6 +1,15 @@
+import 'dart:core';
+import 'dart:core';
 import 'dart:math' as math show pi;
+import 'package:check_in_system/AdminPage/business_profile/business_profile.dart';
+import 'package:check_in_system/AdminPage/categories/categories.dart';
 import 'package:check_in_system/AdminPage/dashboard/customer_visits.dart';
+import 'package:check_in_system/AdminPage/dashboard/staff.dart';
+import 'package:check_in_system/AdminPage/dine_in_tables/dine_in_tables.dart';
 import 'package:check_in_system/AdminPage/login/admin_login.dart';
+import 'package:check_in_system/sales/bar_chart.dart';
+import 'package:check_in_system/sales/pie_chart.dart';
+import 'package:check_in_system/sales/recent_transaction.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collapsible_sidebar/collapsible_sidebar.dart';
 import 'package:collapsible_sidebar/collapsible_sidebar/collapsible_item.dart';
@@ -9,18 +18,47 @@ import 'package:flutter/material.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'order_items.dart';
 class AdminDashboard extends StatefulWidget {
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+
+  var maskFormatter = new MaskTextInputFormatter(mask: '+61 (##) ####-####', filter: { "#": RegExp(r'[0-9]') });
   bool dashboard = false;
   bool qrCode = false;
   bool customerVisits = false;
   String dropdownValue = '';
+  List todayPrice = [];
+getTodayPrice(setstate) async{
+  var date = new DateTime.now().toString();
+  var dateParse = DateTime.parse(date);
+  var formattedDate = DateFormat('dd-MM-yyyy')
+      .format(DateTime.parse(dateParse.toString()));
+  QuerySnapshot data = await FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('completedPayment').collection(formattedDate.toString()).get();
+
+  data.docs.forEach((e) {
 
 
+    setState(() {
+      todayPrice.add(e['amount']);
+      // print(' ${(todayPrice.fold(0, (previousValue, element) => previousValue + element)) .toStringAsFixed(2)}');
+
+    });
+
+     });
+
+}
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getTodayPrice(StateSetter );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,26 +66,124 @@ class _AdminDashboardState extends State<AdminDashboard> {
     dropdownValue = 'User Name';
     var date = new DateTime.now().toString();
     var dateParse = DateTime.parse(date);
-    var formattedDate = DateFormat('dd-MM-yy')
+    var formattedDate = DateFormat('dd-MM-yyyy')
         .format(DateTime.parse(dateParse.toString()));
         return Scaffold(
-          appBar: AppBar(
-            leading: Image.asset(
-              "images/wel.png",
-              width: size.width * 0.5,
-              height: size.height * 0.5,
-            ),
-            title: Row(
-              children: [
-                Text('Dropin | ',style: TextStyle(color: Colors.white,fontSize:size .width* 0.02 ),),
-                Text(FirebaseAuth.instance.currentUser ==null ? 'Shop Name ' : FirebaseAuth.instance.currentUser.displayName,style: TextStyle(color: Colors.white,fontSize:size .width* 0.02 ),),
-              ],
-            ),
-
-          ),
+          // appBar: AppBar(
+          //   flexibleSpace: Container(
+          //     decoration: new BoxDecoration(
+          //       gradient: new LinearGradient(
+          //           colors: [
+          //             Colors.deepOrange,
+          //             Colors.white54,
+          //           ],
+          //           begin: const FractionalOffset(0.0, 0.0),
+          //           end: const FractionalOffset(3.0, 5.0),
+          //           stops: [0.0, 1.0],
+          //           tileMode: TileMode.clamp),
+          //     ),
+          //   ),
+          //   backgroundColor: Colors.deepOrange,
+          //   leading: Image.asset(
+          //     "images/wel.png",
+          //     width: size.width * 0.5,
+          //     height: size.height * 0.5,
+          //   ),
+          //   title: Row(
+          //     children: [
+          //       Text('Dropin | ',style: TextStyle(color: Colors.white,fontSize:size .width* 0.02 ),),
+          //       Text(FirebaseAuth.instance.currentUser ==null ? 'Shop Name ' : FirebaseAuth.instance.currentUser.displayName,style: TextStyle(color: Colors.white,fontSize:size .width* 0.02 ),),
+          //     ],
+          //   ),
+          //
+          // ),
           body: SingleChildScrollView(
-            child:Column(
+            child:
+            size.width <= 700 ?
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Padding(
+                  padding: EdgeInsets.only(top: 300),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Align(
+                        alignment: Alignment.center,
+                        child: Text('Please Open in Full Screen',textAlign: TextAlign.center,)),
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              ],
+            ) :
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Container(
+                    width: size.width,
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,color:  Color(0xFFF37325),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                "images/wel.png",
+                                width: size.width * 0.01,
+                                height: size.height * 0.01,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: size.width* 0.01,
+                          ),
+                          Text(
+                            'Dashboard',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: size.width * 0.0150,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              '/',
+                              style: TextStyle(
+                                color: Colors.deepOrange[300],
+                                fontSize: size.width * 0.0150,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.people,
+                            size: size.width * 0.0150,
+                          ),
+                          SizedBox(
+                            width: size.width* 0.01,
+                          ),
+                          Text(
+                            'Create an Item',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: size.width * 0.0150,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                   Row(
                   children: [
 
@@ -56,335 +192,65 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       child: Container(
                         color: Colors.white,
                         height: size.height,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('${FirebaseAuth.instance.currentUser ==null ? 'Shop Name ' : FirebaseAuth.instance.currentUser.displayName} Visitors Dashboard ',style: TextStyle(color: Colors.grey,fontSize: size.width * 0.03),),
-                            ),
-                            size.width <= 700 ?
-                            ListView(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              children: [
-                                Column(
-                                  children: [
-                                StreamBuilder(
-                                stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('customerDetails').collection(formattedDate.toString()).snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                          }
-                          // print(snapshot.data.docs[0]['mobile']);
-                          return Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: SizedBox(
-                                  height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                                  width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                                  child: Card(
-                                    color: Colors.blueGrey.shade600,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: ListTile(
-                                      title: Text("Today Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.blue,),
-                                            Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                          ],
-                                        ),
-                                      ),
-                                      trailing: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Icon(Icons.calendar_today_outlined,color: Colors.blue,size: size.width * 0.03,),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                          );
-                        }
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: SizedBox(
-                        height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                        width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                        child: StreamBuilder(
-                                stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('NewCustomers').collection('NewCustomers').snapshots(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  return Card(
-                                    color: Color(0xFF4C2B47),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: ListTile(
-                                      title: Text("Unique Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.pink,),
-                                            Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.pink,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                          ],
-                                        ),
-                                      ),
-                                      trailing: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Icon(Icons.person,color: Colors.yellow,size: size.width * 0.03,),
-                                      ),
-                                    ),
-                                  );
-                                }
-                        ),
-                      ),
-                    ), Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: SizedBox(
-                        height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                        width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                        child: StreamBuilder(
-                                stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('returnCustomers').collection('customerReturn').snapshots(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-                                  return Card(
-                                    color: Color(0xFF4B4A2B),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: ListTile(
-                                      title: Text("Return Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.yellow,),
-                                            Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.yellow,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                          ],
-                                        ),
-                                      ),
-                                      trailing: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Icon(Icons.people,color: Colors.yellow,size: size.width * 0.03,),
-                                      ),
-                                    ),
-                                  );
-                                }
-                        ),
-                      ),
-                    ),
-                    StreamBuilder(
-                        stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('totalCustomers').collection('customerTotalIndex').snapshots(),
-                        builder: (context, snapshot) {
-                                if (!snapshot.hasData) {
-                                return Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                                }
-                                print(snapshot.data.docs.length);
-                                return Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: SizedBox(
-                                  height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                                  width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                                  child: Card(
-                                    color: Color(0xFFD53343),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: ListTile(
-                                      title: Text("Total Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.0170),),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.white,),
-                                            Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                          ],
-                                        ),
-                                      ),
-                                      trailing: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 20),
-                                        child: Icon(Icons.file_copy_rounded,color: Colors.white,size: size.width * 0.03,),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                );
-                        }
-                    ),
-
-
-                                  ],
-                                ),
-                              ],
-                            )  :  Row(
-                              children: [
-                                StreamBuilder(
-                                  stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('customerDetails').collection(formattedDate.toString()).snapshots(),
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData) {
-                                      return Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    }
-                                    // print(snapshot.data.docs[0]['mobile']);
-                                    return Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: SizedBox(
-                                        height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                                        width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                                        child: Card(
-                                          color: Colors.blueGrey.shade600,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: ListTile(
-                                            title: Text("Today Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                            subtitle: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.blue,),
-                                                  Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.blue,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                                ],
-                                              ),
-                                            ),
-                                            trailing: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Icon(Icons.calendar_today_outlined,color: Colors.blue,size: size.width * 0.03,),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: SizedBox(
-                                    height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
-                                    width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                                    child: StreamBuilder(
-                                      stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('NewCustomers').collection('NewCustomers').snapshots(),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
-                                        return Card(
-                                          color: Color(0xFF4C2B47),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: ListTile(
-                                            title: Text("Unique Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                            subtitle: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.pink,),
-                                                  Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.pink,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                                ],
-                                              ),
-                                            ),
-                                            trailing: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Icon(Icons.person,color: Colors.yellow,size: size.width * 0.03,),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    ),
-                                  ),
-                                ), Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: SizedBox(
-                                    height: size.height * 0.135,
-                                    width:  size.width * 0.2,
-                                    child: StreamBuilder(
-                                      stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('returnCustomers').collection('customerReturn').snapshots(),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
-                                        return Card(
-                                          color: Color(0xFF4B4A2B),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: ListTile(
-                                            title: Text("Return Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
-                                            subtitle: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.yellow,),
-                                                  Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.yellow,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                                ],
-                                              ),
-                                            ),
-                                            trailing: Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Icon(Icons.people,color: Colors.yellow,size: size.width * 0.03,),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: StreamBuilder(
-                                    stream: FirebaseFirestore.instance.collection(FirebaseAuth.instance.currentUser.displayName).doc('totalCustomers').collection('customerTotalIndex').snapshots(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  StreamBuilder(
+                                    stream:  FirebaseFirestore.instance
+                                      .collection(FirebaseAuth.instance.currentUser.displayName)
+                                  .doc("/completedPayment")
+                                  .collection(formattedDate.toString())
+                                  .snapshots(),
                                     builder: (context, snapshot) {
-                                      if (!snapshot.hasData) {
+                                      if (!snapshot.hasData || snapshot.hasError) {
                                         return Center(
                                           child: CircularProgressIndicator(),
                                         );
                                       }
-                                      print(snapshot.data.docs.length);
                                       return Padding(
                                         padding: const EdgeInsets.all(12.0),
                                         child: SizedBox(
                                           height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
                                           width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
-                                          child: Card(
-                                            color: Color(0xFFD53343),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: ListTile(
-                                              title: Text("Total Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.0170),),
-                                              subtitle: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 20),
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.white,),
-                                                    Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
-                                                  ],
-                                                ),
+                                          child: InkWell(
+                                            onTap: (){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=> SidebarPage(salesReport: 2,)));
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(12),
+                                                color: Colors.black
+                                                // gradient: LinearGradient(
+                                                //   colors: [
+                                                //     Colors.deepOrange,
+                                                //     Colors.white54,
+                                                //   ],
+                                                //   begin: const FractionalOffset(0.3, 0.6),
+                                                //   end: const FractionalOffset(1.0, 2.0),
+                                                //   stops: [0.0, 1.0],
+                                                //   tileMode: TileMode.clamp,
+                                                // ),
                                               ),
-                                              trailing: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 20),
-                                                child: Icon(Icons.file_copy_rounded,color: Colors.white,size: size.width * 0.03,),
+                                              child: ListTile(
+                                                title: Text("Today Visits",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
+                                                subtitle: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 20),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.white,),
+                                                      Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
+                                                    ],
+                                                  ),
+                                                ),
+                                                trailing: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 20),
+                                                  child: Icon(Icons.calendar_today_outlined,color: Colors.white,size: size.width * 0.03,),
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -392,11 +258,99 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       );
                                     }
                                   ),
-                                ),
-
-                              ],
-                            )
-                          ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: SizedBox(
+                                      height:size.width <= 700 ? size.height * 0.2:  size.height * 0.135,
+                                      width:size.width <= 700 ? size.width * 0.3: size.width * 0.2,
+                                      child: InkWell(
+                                        onTap: (){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context)=> SidebarPage(salesReport: 2,)));
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFFF37325),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: ListTile(
+                                            title: Text("Today Sale",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
+                                            subtitle: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 20),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.white,),
+                                                  Text(' \$${(todayPrice.fold(0, (previousValue, element) => previousValue + element)).toStringAsFixed(2)}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
+                                                ],
+                                              ),
+                                            ),
+                                            trailing: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 20),
+                                              child: Icon(Icons.person,color: Colors.white,size: size.width * 0.03,),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: SizedBox(
+                                      height: size.height * 0.135,
+                                      width:  size.width * 0.2,
+                                      child: StreamBuilder(
+                                        stream: FirebaseFirestore.instance
+                                            .collection(FirebaseAuth.instance.currentUser.displayName)
+                                            .doc("staff")
+                                            .collection('staffLogin').snapshots(),
+                                        builder: (context, snapshot) {
+                                          if (!snapshot.hasData) {
+                                            return Center(
+                                              child: CircularProgressIndicator(),
+                                            );
+                                          }
+                                          return InkWell(
+                                            onTap: (){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context)=> SidebarPage(staffMembers: 5,check:  true,)));
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(12),
+                                                  color: Colors.black,
+                                              ),
+                                              child: ListTile(
+                                                title: Text("Staff Members",style: TextStyle(color: Colors.white,fontSize: size.width * 0.02),),
+                                                subtitle: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 20),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.arrow_circle_up,size: size.width* 0.01,color: Colors.white,),
+                                                      Text(snapshot.data.docs.length.toString(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: size.width * 0.02),)
+                                                    ],
+                                                  ),
+                                                ),
+                                                trailing: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 20),
+                                                  child: Icon(Icons.people,color: Colors.white,size: size.width * 0.03,),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Bar(),
+                                  PieChartMain(),
+                                ],
+                              ),
+                              RecentTrans(),
+                            ],
+                          ),
                         ),
                       ),
                     )
@@ -417,25 +371,38 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
 
 class SidebarPage extends StatefulWidget {
+  var salesReport; var staffMembers;
+  bool check;
+  SidebarPage({this.salesReport,this.staffMembers,this.check});
   @override
   _SidebarPageState createState() => _SidebarPageState();
 }
 
 class _SidebarPageState extends State<SidebarPage> {
-  TextEditingController fbController = TextEditingController();
-  TextEditingController instaController = TextEditingController();
-  var fbKey = GlobalKey<FormState>();
-  var instaKey = GlobalKey<FormState>();
 
+  List<String> reorderText = [
+    "venkat",
+    "raman",
+    "jayanthi",
+    "mom",
+    "dad",
+    "priya",
+  ];
+
+  TextEditingController categoryController = TextEditingController();
 
   List<CollapsibleItem> _items;
   int _headline;
   NetworkImage _avatarImg =
-  NetworkImage('https://image.shutterstock.com/image-vector/user-icon-person-profile-avatar-260nw-601712213.jpg');
+  NetworkImage('https://image.shutterstock.com/image-vector/user-icon-person-profile-avatar-260nw-601712213.jpg',);
 
-  showAlertDialogInstaURL(BuildContext context) {
+
+
+
+  Widget showAlertDialogFBURL(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     // set up the buttons
+
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
       onPressed:  () {
@@ -445,45 +412,50 @@ class _SidebarPageState extends State<SidebarPage> {
     Widget continueButton = FlatButton(
       child: Text("Continue"),
       onPressed:  () async{
-        await FirebaseFirestore.instance
-            .collection(FirebaseAuth.instance.currentUser.displayName)
-            .doc("socialMedia")
-            .updateData({
-          'insta': instaController.text,
-        });
-        Navigator.pop(context);
+
       },
     );
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Insta Url"),
+      title: Text("Inventory Categories"),
       content: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: instaKey,
-          child: TextFormField(
-            validator: (String value) {
-              if (value.length < 3)
-                return " Enter at least 3 character from Customer Name";
-              else
-                return null;
-            },
-            textCapitalization: TextCapitalization.words,
-            keyboardType: TextInputType.text ,
-            controller: instaController,
-            autofillHints: [AutofillHints.givenName],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              Container(
+                height: size.height,
+                width: size.width,
+                child: ReorderableListView(
+                    children: getListItems(),
+                    onReorder: onReorder),
+              ),
+              TextFormField(
+                validator: (String value) {
+                  if (value.length < 3)
+                    return " Enter at least 3 character from Customer Name";
+                  else
+                    return null;
+                },
+                textCapitalization: TextCapitalization.words,
+                keyboardType: TextInputType.text,
+                controller: categoryController,
+                autofillHints: [AutofillHints.givenName],
 
-            decoration: InputDecoration(
-                labelText: 'insta Url',
-                labelStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: size.width * 0.02,
-                ),
-                prefixIcon: Icon(Icons.data_usage),
-                hoverColor: Colors.yellow,
-                filled: true,
-                focusColor: Colors.yellow),
+                decoration: InputDecoration(
+                    labelText: 'Category',
+                    labelStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: size.width * 0.02,
+                    ),
+                    prefixIcon: Icon(Icons.data_usage),
+                    hoverColor: Colors.yellow,
+                    filled: true,
+                    focusColor: Colors.yellow),
+              ),
+            ],
           ),
         ),
       ),
@@ -500,87 +472,38 @@ class _SidebarPageState extends State<SidebarPage> {
         return alert;
       },
     );
+
   }
-
-
-  showAlertDialogFBURL(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    // set up the buttons
-
-    Widget cancelButton = FlatButton(
-      child: Text("Cancel"),
-      onPressed:  () {
-        Navigator.pop(context);
-      },
-    );
-    Widget continueButton = FlatButton(
-      child: Text("Continue"),
-      onPressed:  () async{
-        await FirebaseFirestore.instance
-            .collection(FirebaseAuth.instance.currentUser.displayName)
-            .doc("socialMedia")
-            .updateData({
-          'facebook': fbController.text,
-        });
-        Navigator.pop(context);
-      },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("Facebook Url"),
-      content: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: fbKey,
-          child: TextFormField(
-            validator: (String value) {
-              if (value.length < 3)
-                return " Enter at least 3 character from Customer Name";
-              else
-                return null;
-            },
-            textCapitalization: TextCapitalization.words,
-            keyboardType: TextInputType.text,
-            controller: fbController,
-            autofillHints: [AutofillHints.givenName],
-
-            decoration: InputDecoration(
-                labelText: 'Facebook Url',
-                labelStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: size.width * 0.02,
-                ),
-                prefixIcon: Icon(Icons.data_usage),
-                hoverColor: Colors.yellow,
-                filled: true,
-                focusColor: Colors.yellow),
-          ),
-        ),
-      ),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
-
-
   @override
   void initState() {
     super.initState();
     _items = _generateItems;
-    _headline = 1;
+   widget.salesReport == null? widget.staffMembers == null ?  _headline = 1 : _headline = 5 : _headline = widget.salesReport;
   }
 
+
+  List<ListTile> getListItems()=> reorderText
+      .asMap()
+      .map((index, item) => MapEntry(index, buildReorderText( item, index)))
+      .values
+      .toList();
+  ListTile buildReorderText(String item,int index)=> ListTile(
+    key: ValueKey(item),
+    title: Text(item),
+    leading: Text('#${index + 1}'),
+  );
+void onReorder(int oldIndex, int  newIndex){
+  if(newIndex > oldIndex ){
+    newIndex = 1;
+  }
+
+  setState(() {
+    String check = reorderText[oldIndex];
+    
+    reorderText.removeAt(oldIndex);
+    reorderText.insert(newIndex, check);
+  });
+}
   List<CollapsibleItem> get _generateItems {
     return [
       CollapsibleItem(
@@ -590,25 +513,32 @@ class _SidebarPageState extends State<SidebarPage> {
         isSelected: true,
       ),
       CollapsibleItem(
-        text: 'Customer Visits ',
+        text: 'Sales Report ',
         icon: Icons.people,
         onPressed: () => setState(() => _headline = 2),
       ),
       CollapsibleItem(
-        text: 'Facebook Url ',
-        icon: Icons.link,
+        text: 'Order Items ',
+        icon: Icons.fastfood,
         onPressed: () => setState(() {
-          _headline = 1;
-          showAlertDialogFBURL(context);
+          _headline = 3;
         }
         ),
       ),
       CollapsibleItem(
-        text: 'Instagram Url ',
-        icon: Icons.link,
+        text: 'Inventory Categories',
+        icon: Icons.category,
         onPressed: () => setState(() {
-          _headline = 3;
-          showAlertDialogInstaURL(context);
+          // showAlertDialogFBURL( context);
+          _headline = 4;
+        }
+        ),
+      ),
+      CollapsibleItem(
+        text: 'Staff',
+        icon: Icons.people,
+        onPressed: () => setState(() {
+          _headline = 5;
         }),
       ),
       CollapsibleItem(
@@ -620,11 +550,20 @@ class _SidebarPageState extends State<SidebarPage> {
           Navigator.push(context, MaterialPageRoute(builder: (context)=> AdminLoginPage(),));
         }),
       ),
-      // CollapsibleItem(
-      //   text: 'Settings',
-      //   icon: Icons.settings,
-      //   onPressed: () => setState(() => _headline = 'Settings'),
-      // ),
+      CollapsibleItem(
+        text: 'Business Profile',
+        icon: Icons.business,
+        onPressed: () => setState(() {
+          _headline = 6;
+        }),
+      ),
+      CollapsibleItem(
+        text: 'Dine In Table',
+        icon: Icons.table_chart_outlined,
+        onPressed: () => setState(() {
+          _headline = 7;
+        }),
+      ),
       // CollapsibleItem(
       //   text: 'Home',
       //   icon: Icons.home,
@@ -661,17 +600,17 @@ class _SidebarPageState extends State<SidebarPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    instaController.text = 'https://www.instagram.com/';
-    fbController.text = 'https://www.facebook.com/';
     return SafeArea(
       child: Scaffold(
         body: CollapsibleSidebar(
+          unselectedIconColor: Colors.white,
+          selectedIconColor: Color(0xFFF37325),
           items: _items,
-          avatarImg: _avatarImg,
-          title:FirebaseAuth.instance.currentUser ==null ? 'User Name ' : FirebaseAuth.instance.currentUser.displayName,
           body: landingWidget(page: _headline,),
           backgroundColor: Colors.black,
-          selectedTextColor: Colors.limeAccent,
+          selectedTextColor: Colors.white,
+          avatarImg: _avatarImg,unselectedTextColor:  Color(0xFFF37325),
+          title:FirebaseAuth.instance.currentUser ==null ? 'User Name ' : FirebaseAuth.instance.currentUser.displayName,
           textStyle: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
           titleStyle: TextStyle(
               fontSize: 20,
@@ -698,9 +637,101 @@ class landingWidget extends StatelessWidget {
     {
       case 1 : return AdminDashboard();
       case 2 : return CustomerVisits();
-      case 3 : return AdminDashboard();
+      case 3 : return OrderItems();
+      case 4 : return Categories();
+      case 5 : return StaffMembers();
+      case 6 : return BusinessProfile();
+      case 7 : return DineInTables();
       default : return Container(color: Colors.pink,);
     }
   }
 }
+
+
+
+class TopTenList extends StatefulWidget {
+  @override
+  _TopTenListState createState() => _TopTenListState();
+}
+
+class _TopTenListState extends State<TopTenList> {
+  List<String> topTenGames = [
+    "World of Warcraft",
+    "Final Fantasy VII",
+    "Animal Crossing",
+    "Diablo II",
+    "Overwatch",
+    "Valorant",
+    "Minecraft",
+    "Dota 2",
+    "Half Life 3",
+    "Grand Theft Auto: Vice City"
+  ];
+
+  getCategory()async{
+    List cat = [];
+    List demo;
+    print('get');
+  var data =  await FirebaseFirestore.instance
+        .collection(FirebaseAuth.instance.currentUser.displayName).doc('itemDetails').collection('items')
+        .get();
+
+
+  data.docs.forEach((e){
+    print(e.get('cat'));
+    cat.add(e.get('cat'));
+  });
+  print(cat);
+  print(cat[4][0]);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getCategory();
+    super.initState();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Top Ten"),
+      ),
+      body: ReorderableListView(
+        onReorder: onReorder,
+        children: getListItems(),
+      ),
+    );
+  }
+
+  List<ListTile> getListItems() => topTenGames
+      .asMap()
+      .map((i, item) => MapEntry(i, buildTenableListTile(item, i)))
+      .values
+      .toList();
+
+  ListTile buildTenableListTile(String item, int index) {
+    return ListTile(
+      key: ValueKey(item),
+      title: Text(item),
+      leading: Text("#${index + 1}"),
+    );
+  }
+
+  void onReorder(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    setState(() {
+      String game = topTenGames[oldIndex];
+
+      topTenGames.removeAt(oldIndex);
+      topTenGames.insert(newIndex, game);
+    });
+  }
+}
+
+
 

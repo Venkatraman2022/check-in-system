@@ -91,6 +91,52 @@ String checkDemo = 'Dropin_Castle';
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    height: 150,
+                    width:  size.width ,
+                    decoration: BoxDecoration(
+                      image: DecorationImage( alignment: Alignment.center,
+                          image: AssetImage("images/weltop.jpg",),fit: BoxFit.contain ,scale: 1.0),
+
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Image.asset(
+                            "images/logo.png",
+                            width: 61,
+                            height: 82,
+                          ),
+                          SizedBox(width: size.width * 0.07,),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Dropin',
+                                  style: TextStyle(
+                                      fontSize: size.width * 0.07,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  'CHECKIN SYSTEM ',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: size.width * 0.042,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
@@ -100,7 +146,7 @@ String checkDemo = 'Dropin_Castle';
                           color: Color(0xFFFEFEFE),
                         ),
                         child: Image.asset(
-                          "images/cis.gif",
+                          "images/wel.gif",
                           width: size.width * 0.5,
                           height: size.height * 0.3,
                         ),
@@ -461,12 +507,12 @@ String checkDemo = 'Dropin_Castle';
                           mobileKey.currentState.validate();
                         });
                         if(mobileKey.currentState.validate() && nameKey.currentState.validate()){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FeedbackPage(urlName: urlData,)
-                              ));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) =>
+                          //             FeedbackPage(urlName: urlData,)
+                          //     ));
                         }
 
                         var snap = await FirebaseFirestore.instance.collection(urlData).doc('totalCustomers').collection('customerTotal').doc(mobileNumberController.text).get();

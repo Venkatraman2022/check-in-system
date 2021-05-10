@@ -1,4 +1,5 @@
 import 'package:check_in_system/AdminPage/dashboard/admin_dashboard.dart';
+import 'package:check_in_system/AdminPage/login/admin_login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -168,15 +169,26 @@ class _AdminRegisterPageState extends State<AdminRegisterPage> {
                                   await FirebaseFirestore.instance
                                       .collection(nameController.text)
                                       .doc("AdminDetails")
-                                      .updateData({
+                                      .set({
                                     'email' : FirebaseAuth.instance.currentUser.email,
                                     'uid' : FirebaseAuth.instance.currentUser.uid,
                                     'shopName' : nameController.text ,
                                     'password' : passwordController.text,
-                                  }).then((value) {
+                                  }).then((value)async {
+                                    await FirebaseFirestore.instance
+                                        .collection(nameController.text)
+                                        .doc("businessProfile")
+                                        .set({
+                                      "shopName": '',
+                                      "address": '',
+                                      "stateCountry": '',
+                                      "phone": '',
+                                      "gstIN": '',
+                                      "staffId" : '',
+                                    });
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => AdminDashboard(),),
+                                      MaterialPageRoute(builder: (context) => AdminLoginPage(),),
                                     );
                                   }).catchError((e){
                                     print(e);

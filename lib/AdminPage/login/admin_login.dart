@@ -67,16 +67,20 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
 
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
                             hintText: "Email\*",
                             hintStyle: TextStyle(
                               fontSize: size.width* 0.02,
                               color:Colors.white,
                             ),
-                            suffixIcon: Icon(Icons.email_rounded),
-                            hoverColor: Colors.yellow,
+                            suffixIcon: Icon(Icons.email_rounded,color: Colors.deepOrange,),
+                            hoverColor: Colors.grey,
                             filled: true,
-                            focusColor: Colors.yellow),
+                            focusColor: Colors.white),
                         style: TextStyle(color: Colors.black),
                       ),
                     ),
@@ -123,8 +127,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         onChanged: (value){
                         },
                         decoration: InputDecoration(
-
-                            hintText: "Password\*",
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                            ),
+                              hintText: "Password\*" ,
                             hintStyle: TextStyle(
                               fontSize: size.width* 0.02,
                               color: Colors.white,
@@ -139,9 +147,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                               },
                               color: Colors.deepOrange,
                             ),
-                            hoverColor: Colors.yellow,
+                            hoverColor: Colors.grey,
                             filled: true,
-                            focusColor: Colors.yellow),
+                            focusColor: Colors.white),
                         style: TextStyle(color: Colors.black),
                       ),
                     ),
@@ -165,23 +173,8 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                                   .signInWithEmailAndPassword(
                                   email: emailController.text, password:passwordController.text, )
                                   .then((signedInUser) async{
-                                // await FirebaseFirestore.instance
-                                //     .collection(nameController.text)
-                                //     .doc("AdminDetails")
-                                //     .updateData({
-                                //   'email' : FirebaseAuth.instance.currentUser.email,
-                                //   'uid' : FirebaseAuth.instance.currentUser.uid,
-                                //   'shopName' : nameController.text ,
-                                //   'password' : passwordController.text,
-                                // }).then((value) {
-                                 Navigator.pushReplacementNamed(context, 'demo2');
-                                // }).catchError((e){
-                                //   print(e);
-                                // });
-                                // signedInUser.user.updateProfile(displayName: nameController.text );
-                                // Scaffold.of(context).showSnackBar(SnackBar(
-                                //   content: Text(' deleted'),
-                                // ));
+                                 Navigator.pushReplacementNamed(context, 'SP');
+                                // Navigator.push(context, MaterialPageRoute(builder: (context)=> SidebarPage()));
                               }).catchError((e) {
                                 print(e);
                                 var snackbar = SnackBar(
