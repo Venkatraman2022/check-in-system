@@ -438,11 +438,11 @@ class _CustomerVisitsState extends State<CustomerVisits> {
                       onChanged: (String newValue) {
                         setState(() {
                           dropdownValuePayment = newValue;
-                          dropdownValuePayment == 'Cash' ? _searchResult = 'Cash': dropdownValuePayment == 'Debit' ? _searchResult = 'Debit' : dropdownValuePayment == 'Credit' ? _searchResult = 'Credit' : _searchResult = '';
+                          dropdownValuePayment == 'Cash' ? _searchResult = 'Cash': dropdownValuePayment == 'Card' ? _searchResult = 'Card'  : _searchResult = '';
                           print(_searchResult);
                         });
                       },
-                      items: <String>['All Payment','Cash', 'Debit', 'Credit', ]
+                      items: <String>['All Payment','Cash', 'Card', ]
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,

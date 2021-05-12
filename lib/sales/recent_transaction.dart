@@ -121,11 +121,12 @@ class _RecentTransState extends State<RecentTrans> {
                 .collection(FirebaseAuth.instance.currentUser.displayName)
                 .doc('completedPayment')
                 .collection('totalPayment')
-                .where('date', isGreaterThanOrEqualTo: formattedDate.toString())
+                .where('date', isGreaterThanOrEqualTo: formattedDate.toString(),)
                 .orderBy(
                   'date',
                   descending: true,
                 )
+                // .orderBy('time',descending: true)
                 .limit(4)
                 .snapshots(),
             builder: (context, AsyncSnapshot snapshot) {
@@ -134,6 +135,7 @@ class _RecentTransState extends State<RecentTrans> {
                   child: CircularProgressIndicator(),
                 );
               } else {
+                print(snapshot.connectionState);
                 return SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: DataTable(

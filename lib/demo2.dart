@@ -1,132 +1,164 @@
-// import 'dart:math' as math show pi;
-//
-// import 'package:flutter/material.dart';
-//
-// import 'package:collapsible_sidebar/collapsible_sidebar.dart';
-//
-//
-//
-// class SidebarPage extends StatefulWidget {
-//   @override
-//   _SidebarPageState createState() => _SidebarPageState();
-// }
-//
-// class _SidebarPageState extends State<SidebarPage> {
-//   List<CollapsibleItem> _items;
-//   String _headline;
-//   NetworkImage _avatarImg =
-//   NetworkImage('https://www.w3schools.com/howto/img_avatar.png');
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _items = _generateItems;
-//     _headline = _items.firstWhere((item) => item.isSelected).text;
-//   }
-//
-//   List<CollapsibleItem> get _generateItems {
-//     return [
-//       CollapsibleItem(
-//         text: 'Dashboard',
-//         icon: Icons.assessment,
-//         onPressed: () => setState(() => _headline = 'DashBoard'),
-//         isSelected: true,
-//       ),
-//       CollapsibleItem(
-//         text: 'Errors',
-//         icon: Icons.cancel,
-//         onPressed: () => setState(() => _headline = 'Errors'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Search',
-//         icon: Icons.search,
-//         onPressed: () => setState(() => _headline = 'Search'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Notifications',
-//         icon: Icons.notifications,
-//         onPressed: () => setState(() => _headline = 'Notifications'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Settings',
-//         icon: Icons.settings,
-//         onPressed: () => setState(() => _headline = 'Settings'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Home',
-//         icon: Icons.home,
-//         onPressed: () => setState(() => _headline = 'Home'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Alarm',
-//         icon: Icons.access_alarm,
-//         onPressed: () => setState(() => _headline = 'Alarm'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Eco',
-//         icon: Icons.eco,
-//         onPressed: () => setState(() => _headline = 'Eco'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Event',
-//         icon: Icons.event,
-//         onPressed: () => setState(() => _headline = 'Event'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Email',
-//         icon: Icons.email,
-//         onPressed: () => setState(() => _headline = 'Email'),
-//       ),
-//       CollapsibleItem(
-//         text: 'Face',
-//         icon: Icons.face,
-//         onPressed: () => setState(() => _headline = 'Face'),
-//       ),
-//     ];
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     var size = MediaQuery.of(context).size;
-//     return SafeArea(
-//       child: Scaffold(
-//         body: CollapsibleSidebar(
-//           items: _items,
-//           avatarImg: _avatarImg,
-//           title: 'John Smith',
-//           body: _body(size, context),
-//           backgroundColor: Colors.black,
-//           selectedTextColor: Colors.limeAccent,
-//           textStyle: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
-//           titleStyle: TextStyle(
-//               fontSize: 20,
-//               fontStyle: FontStyle.italic,
-//               fontWeight: FontWeight.bold),
-//           toggleTitleStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _body(Size size, BuildContext context) {
-//     return Container(
-//       height: double.infinity,
-//       width: double.infinity,
-//       color: Colors.blueGrey[50],
-//       child: Center(
-//         child: Transform.rotate(
-//           angle: math.pi / 2,
-//           child: Transform.translate(
-//             offset: Offset(-size.height * 0.3, -size.width * 0.23),
-//             child: Text(
-//               _headline,
-//               style: Theme.of(context).textTheme.headline1,
-//               overflow: TextOverflow.visible,
-//               softWrap: false,
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Generate a list of fiction prodcts
+  // final List<Map> _products = List.generate(30, (i) {
+  //   return {"id": i, "name": "Product $i", "price": Random().nextInt(200) + 1};
+  // });
+  TextEditingController controller = TextEditingController();
+  String _searchResult = '';
+  int _currentSortColumn = 0;
+  bool _isAscending = true;
+  List<TableData> tabledata = [];
+  List<Map> _products = [];
+  getdata() async {
+    print('getdata');
+    await FirebaseFirestore.instance
+        .collection('posshop')
+        .doc('itemDetails')
+        .collection('items')
+        .get().then((value) {
+      value.docs.forEach((element) {
+        List dat = element.get('cat');
+        print(dat[0]);
+        tabledata.add(TableData(
+          item: element.get('name'),
+          image: element.get('imgUrl'),
+          price: element.get('price'),
+          category: dat.join('').toString(),
+
+        ));
+        print(tabledata);
+      });
+    });
+    tabledata.map((data){
+      print('${data.item} \t${data.price} \t${data.image}');
+      if(data.image.contains(controller.text.toLowerCase())){
+        print('top search ${controller.text}');
+        _products.add({'item': data.item, 'image': data.image, 'price': data.price, 'category': data.category});
+      }
+      return
+          _products;
+    } ).toList();
+  }
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('init');
+    getdata();
+  }
+  @override
+  Widget build(BuildContext context) {
+Size size = MediaQuery.of(context).size;
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Kindacode.com'),
+        ),
+        body: Container(
+          width: double.infinity,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Card(
+                  child: SizedBox(
+                    height: size.height * 0.06,
+                    width: size.width * 0.4,
+                    child: new ListTile(
+                      leading: new Icon(Icons.search),
+                      title: new TextField(
+                          controller: controller,
+                          decoration: new InputDecoration(
+                              hintText: 'Search', border: InputBorder.none),
+                          onChanged: (value) {
+                            setState(() {
+                              _searchResult = value;
+                              print(_searchResult);
+                              // usersFiltered = users.where((user) => user.name.contains(_searchResult)).toList();
+                            });
+                          }),
+                      trailing: new IconButton(
+                        icon: new Icon(controller.text != ''
+                            ? Icons.cancel
+                            : Icons.more_horiz),
+                        onPressed: () {
+                          setState(() {
+                            controller.clear();
+                            _searchResult = '';
+                            // usersFiltered = users;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                DataTable(
+                  sortColumnIndex: _currentSortColumn,
+                  sortAscending: _isAscending,
+                  headingRowColor: MaterialStateProperty.all(Colors.amber[200]),
+                  columns: [
+                    DataColumn(label: Text('Item')),
+                    DataColumn(label: Text('Category')),
+
+                    DataColumn(
+                        label: Text(
+                          'Price',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+
+                        // Sorting function
+                        onSort: (columnIndex, _) {
+                          setState(() {
+                            _currentSortColumn = columnIndex;
+                            if (_isAscending == true) {
+                              _isAscending = false;
+                              // sort the product list in Ascending, order by Price
+                              _products.sort((productA, productB) =>
+                                  productB['price'].compareTo(productA['price']));
+                            } else {
+                              _isAscending = true;
+                              // sort the product list in Descending, order by Price
+                              _products.sort((productA, productB) =>
+                                  productA['price'].compareTo(productB['price']));
+                            }
+                          });
+                        }
+                        ),
+                    DataColumn(label: Text('Image')),
+                  ],
+                  rows: _products.map((item) {
+                    print('${item['item']} \t${item['price']} \t${item['image']}');
+                    return DataRow(cells: [
+                      DataCell(Text(item['item'].toString())),
+                      DataCell(Text(item['category'].toString())),
+
+                      DataCell(Text(item['price'].toString())),
+                    DataCell(Text(item['image'].toString())),
+                    ]);
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+}
+
+class TableData{
+  String item;
+  String category;
+  double price;
+  String image;
+  TableData({this.item,this.price,this.image,this.category});
+}

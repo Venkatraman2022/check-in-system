@@ -603,11 +603,13 @@ void onReorder(int oldIndex, int  newIndex){
     return SafeArea(
       child: Scaffold(
         body: CollapsibleSidebar(
+
           unselectedIconColor: Colors.white,
           selectedIconColor: Color(0xFFF37325),
           items: _items,
           body: landingWidget(page: _headline,),
           backgroundColor: Colors.black,
+          toggleTitle: 'Developed By Dropin',
           selectedTextColor: Colors.white,
           avatarImg: _avatarImg,unselectedTextColor:  Color(0xFFF37325),
           title:FirebaseAuth.instance.currentUser ==null ? 'User Name ' : FirebaseAuth.instance.currentUser.displayName,

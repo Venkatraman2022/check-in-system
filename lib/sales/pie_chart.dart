@@ -21,6 +21,7 @@ class _PieChartMainState extends State<PieChartMain> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     var dates = new DateTime.now().subtract(Duration(days: 7,hours: 0,minutes: 0)).toString();
     var dateParse = DateTime.parse(dates);
     var formattedDate =
@@ -60,24 +61,34 @@ class PieChartSState extends State<PieChartS> {
   List weekData = [];
   List weekDate = [];
   List weekDay = [];
-  Map<String, int> count = {};
+  Map<String, int> countDate = {};
+  Map<String, int> countDay = {};
 
   getData(){
     String dr ;
     setState(() {
       widget.snap.docs.forEach((element){
-        count['${element.get('date')}'] = count.containsKey('${element.get('date')}') ? count['${element.get('date')}'] + 1: 1;
+        countDate['${element.get('date')}'] = countDate.containsKey('${element.get('date')}') ? countDate['${element.get('date')}'] + 1: 1;
+        countDay['${element.get('day')}'] = countDay.containsKey('${element.get('day')}') ? countDay['${element.get('day')}'] + 1: 1;
         // print(element.get('date'));
-        weekDay.add(element.get('day'));
+
       });
     });
-    count.forEach((key, value) {
+    countDate.forEach((key, value) {
       // print(value);
       // print(key);
+     String dr = key.toString();
+      weekDate.add(dr.split('-').last);
       weekData.add(value);
-      weekDate.add(key);
+      // weekDate.add(key);
       print(weekData);
     });
+    countDay.forEach((key, value) {
+      weekDay.add(key);
+    });
+    print(weekDate);
+    print(weekDay);
+    print(weekData);
   }
 
 @override
@@ -175,10 +186,11 @@ class PieChartSState extends State<PieChartS> {
   }
 
   List<PieChartSectionData> showingSections() {
+    Size size = MediaQuery.of(context).size;
     return List.generate(weekData.length, (i) {
       final isTouched = i == touchedIndex;
-      final double fontSize = isTouched ? 20 : 16;
-      final double radius = isTouched ? 120 : 100;
+      final double fontSize = isTouched ?  size .width * 0.01 : size .width * 0.01;
+      final double radius = isTouched ? size .width * 0.09 : size .width * 0.07;
       final double widgetSize = isTouched ? 55 : 40;
 
       switch (i) {
@@ -190,8 +202,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[0]}'),
-            badgePositionPercentageOffset: .70,
+            badgeWidget: Text('${weekDate[0]}',style: TextStyle(fontSize: size .width * 0.01),),
+            badgePositionPercentageOffset: .67,
+            titlePositionPercentageOffset: .40,
           );
         case 1:
           return PieChartSectionData(
@@ -201,8 +214,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[1]}'),
+            badgeWidget: Text('${weekDate[1]}',style: TextStyle(fontSize: size .width * 0.01),),
             badgePositionPercentageOffset: .70,
+            titlePositionPercentageOffset: .40,
           );
         case 2:
           return PieChartSectionData(
@@ -212,9 +226,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[2]}'),
-            badgePositionPercentageOffset: .60,
-            titlePositionPercentageOffset: .150
+            badgeWidget: Text('${weekDate[2]}',style: TextStyle(fontSize: size .width * 0.01),),
+            badgePositionPercentageOffset: .90,
+            titlePositionPercentageOffset: .40,
           );
         case 3:
           return PieChartSectionData(
@@ -224,8 +238,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[3]}'),
+            badgeWidget: Text('${weekDate[3]}',style: TextStyle(fontSize: size .width * 0.01),),
             badgePositionPercentageOffset: .70,
+            titlePositionPercentageOffset: .40,
           );
         case 4:
           return PieChartSectionData(
@@ -235,8 +250,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[4]}'),
+            badgeWidget: Text('${weekDate[4]}',style: TextStyle(fontSize: size .width * 0.01),),
             badgePositionPercentageOffset: .70,
+            titlePositionPercentageOffset: .40,
           );
         case 5:
           return PieChartSectionData(
@@ -246,8 +262,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color:  Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[5]}'),
+            badgeWidget: Text('${weekDate[5]}',style: TextStyle(fontSize: size .width * 0.01),),
             badgePositionPercentageOffset: .70,
+            titlePositionPercentageOffset: .40,
           );
         case 6:
           return PieChartSectionData(
@@ -257,8 +274,9 @@ class PieChartSState extends State<PieChartS> {
             radius: radius,
             titleStyle: TextStyle(
                 fontSize: fontSize, fontWeight: FontWeight.bold, color: Color(0xFFF37325),),
-            badgeWidget: Text('${weekDate[6]}'),
+            badgeWidget: Text('${weekDate[6]}',style: TextStyle(fontSize: size .width * 0.01),),
             badgePositionPercentageOffset: .70,
+            titlePositionPercentageOffset: .40,
           );
         default:
           return null;

@@ -338,6 +338,7 @@ class _OrderItemsState extends State<OrderItems> {
                                           fontSize: size.width * 0.02,
                                         ),
                                       ),
+
                                     ),
                                   DataColumn(
                                       label: Text(
